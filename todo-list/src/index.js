@@ -1,67 +1,43 @@
 import "./styles.css";
-import React, { useState } from "react";
+import React, { useState, useReducer } from "react";
 import ReactDOM from "react-dom";
 
 let id = 0;
-let items = [];
-let filter = "all";
 
-function addItem(title, setItemsState, setNewItem) {
-  items.push({
+function createItem(title) {
+  return {
     title: title,
     completed: false,
     id: id++
-  });
-
-  if (setItemsState) {
-    setItemsState([...items]);
-  }
-
-  if (setNewItem) {
-    setNewItem('');
-  }
+  };
 }
 
-function toggleCompleted(id, setItemsState) {
-  items.forEach((item) => {
-    if (item.id === id) {
-      item.completed = !item.completed;
-    }
-  });
-
-  if (setItemsState) {
-    setItemsState([...items]);
+const reducer = (state, action) => {
+  if (action.type === 'add') {
+    return [...state, createItem(action.value)];
+  } else if (action.type === 'toogle') {
+    return state.map(item => {
+      if (item.id === action.value) {
+        return { ...item, completed: !item.completed }
+      }
+      return item;
+    });
+  } else if (action.type === 'remove') {
+    return state.filter(item => !item.completed);
   }
 }
-
-function removeCompletedItems(setItemsState) {
-  items = items.filter((item) => {
-    return !item.completed;
-  });
-
-  if (setItemsState) {
-    setItemsState([...items]);
-  }
-}
-
-function filterItems(filterSelected, itemsState, setItemsState) {
-  filter = filterSelected;
-
-  setItemsState([...itemsState]);
-}
-
-addItem("Go to work");
-addItem("Eat food");
 
 function App() {
   const [newItem, setNewItem] = useState('');
-  const [itemsState, setItemsState] = useState(items);
+  const [filter, setFilter] = useState('all');
+  const [state, dispatch] = useReducer(reducer, [ createItem("Go to work"), createItem("Eat food") ]);
 
   return (
     <>
       <h1>todos</h1>
       <form onSubmit={(event) => {
-            addItem(newItem, setItemsState, setNewItem);
+            dispatch({ type: 'add', value: newItem });
+            setNewItem('');
             event.preventDefault();
           }}>
         <input
@@ -78,7 +54,7 @@ function App() {
       <hr />
       <div>
         <label htmlFor="filter">Filter</label>
-        <select id="filter" value={filter} onChange={(event) => filterItems(event.target.value, itemsState, setItemsState) }>
+        <select id="filter" value={filter} onChange={(event) => setFilter(event.target.value) }>
           <option value="all">All</option>
           <option value="completed">Completed</option>
           <option value="uncompleted">Uncompleted</option>
@@ -86,7 +62,7 @@ function App() {
       </div>
       <ul>
         {
-          itemsState
+          state
             .filter(item => {
               if (filter === 'all') {
                 return true;
@@ -100,7 +76,7 @@ function App() {
             .map(item =>
               <li
                 key={item.id}
-                onClick={() => toggleCompleted(item.id, setItemsState)}
+                onClick={() => dispatch( { type: 'toogle', value: item.id })}
                 style={{ textDecoration: item.completed ? 'line-through' : 'none' }}
               >
                 {item.title}
@@ -108,7 +84,7 @@ function App() {
             )
         }
       </ul>
-      <button onClick={() => removeCompletedItems(setItemsState)}>
+      <button onClick={() => dispatch({ type: 'remove' })}>
         Remove completed items
       </button>
       <script src="src/index.ts"></script>
