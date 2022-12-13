@@ -1,4 +1,6 @@
 import { useState, useReducer } from "react";
+import TodoInput from "./TodoInput";
+import TodoFilter from "./TodoFilter";
 
 let id = 0;
 
@@ -26,38 +28,24 @@ const reducer = (state, action) => {
 }
 
 function App() {
-  const [newItem, setNewItem] = useState('');
   const [filter, setFilter] = useState('all');
   const [state, dispatch] = useReducer(reducer, [ createItem("Go to work"), createItem("Eat food") ]);
 
   return (
     <>
       <h1>todos</h1>
-      <form onSubmit={(event) => {
-            dispatch({ type: 'add', value: newItem });
-            setNewItem('');
-            event.preventDefault();
-          }}>
-        <input
-          aria-label="Type a task to add to the list"
-          name="input"
-          type="text"
-          placeholder="What needs to be done?"
-          onChange={(event) => {
-            setNewItem(event.target.value)
-          }}
-          value={newItem}
-        />
-      </form>
+      <TodoInput
+        onSubmit={ (value) => {
+          dispatch({ type: 'add', value: value });
+        }}
+      />
       <hr />
-      <div>
-        <label htmlFor="filter">Filter</label>
-        <select id="filter" value={filter} onChange={(event) => setFilter(event.target.value) }>
-          <option value="all">All</option>
-          <option value="completed">Completed</option>
-          <option value="uncompleted">Uncompleted</option>
-        </select>
-      </div>
+      <TodoFilter
+        filter={ filter }
+        onChange={(value) => {
+          setFilter(value);
+        }}
+      />
       <ul>
         {
           state
