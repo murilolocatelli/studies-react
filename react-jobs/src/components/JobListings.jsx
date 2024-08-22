@@ -2,9 +2,46 @@ import { useState, useEffect } from 'react';
 import JobListing from './JobListing';
 import Spinner from './Spinner';
 import { stringify } from 'postcss';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 const JobListings = ({ isHome = false }) => {
-  const [jobs, setJobs] = useState([]);
+  // Example using React query
+  const queryClient = useQueryClient();
+  
+  const {data: jobs, isLoading } = useQuery({
+    // it is possible to use params. e.g.:
+    //queryKey: ["todos", { search }],
+    queryKey: ['jobs'],
+    queryFn: async () => {
+      const apiUrl = isHome
+        ? '/api/jobs?_limit=3'
+        : '/api/jobs';
+
+      console.log(apiUrl);
+
+      const res = await fetch(apiUrl);
+      const data = await res.json();
+
+      return data;
+    }
+
+    // it is possible to configure other properties. e.g.:
+    //staleTime: Infinity,
+    //cacheTime: 0,
+  });
+
+  // It is possible to invalidate cache. e.g.:
+
+  //const { mutateAsync: addTodoMutation } = useMutation({
+  //  mutationFn: addTodo,
+  //  onSuccess: () => {
+  //    queryClient.invalidateQueries({ queryKey: ["todos"] });
+  //  },
+  //});
+
+  // End example using React Query
+
+  /*const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,9 +63,7 @@ const JobListings = ({ isHome = false }) => {
     };
 
     fetchJobs();
-  }, []);
-
-  const jobListings = isHome ? jobs.slice(0, 3) : jobs;
+  }, []);*/
 
   return (
     <>
@@ -38,9 +73,9 @@ const JobListings = ({ isHome = false }) => {
           <h2 className='text-3xl font-bold text-indigo-500 mb-6 text-center'>
             { isHome ? 'Recent Jobs' : 'Browse Jobs' }
           </h2>
-          {loading
+          {isLoading
             ? (
-              <Spinner loading={loading} />
+              <Spinner loading={isLoading} />
             )
             : (
               <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
