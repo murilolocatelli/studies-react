@@ -8,7 +8,7 @@ const JobListings = ({ isHome = false }) => {
   // Example using React query
   const queryClient = useQueryClient();
   
-  const {data: jobs, isLoading } = useQuery({
+  const {data: jobs, isLoading, error } = useQuery({
     // it is possible to use params. e.g.:
     //queryKey: ["todos", { search }],
     queryKey: ['jobs'],
@@ -23,7 +23,8 @@ const JobListings = ({ isHome = false }) => {
       const data = await res.json();
 
       return data;
-    }
+    },
+    refetchInterval: 60000,
 
     // it is possible to configure other properties. e.g.:
     //staleTime: Infinity,
@@ -80,9 +81,11 @@ const JobListings = ({ isHome = false }) => {
             : (
               <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
                 {
-                  jobs.map((job) => (
-                    <JobListing key={job.id} job={job} />
-                  ))
+                  error
+                    ? 'Error' + error.message
+                    : jobs.map((job) => (
+                      <JobListing key={job.id} job={job} />
+                    ))
                 }
               </div>
             )
