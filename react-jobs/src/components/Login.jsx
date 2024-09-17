@@ -1,7 +1,7 @@
 import { useSignIn } from 'react-auth-kit';
 import { useState } from 'react';
 
-function Login() {
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -79,6 +79,6 @@ function Login() {
       </div>
     </section>
   );
-}
+};
 
 export default Login;
